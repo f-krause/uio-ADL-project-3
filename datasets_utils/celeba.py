@@ -6,6 +6,7 @@ from .utils import download_file_from_google_drive, check_integrity
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
+
 class CelebA(VisionDataset):
     """`Large-scale CelebFaces Attributes (CelebA) Dataset <http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html>`_ Dataset.
 
@@ -164,25 +165,22 @@ class CelebA(VisionDataset):
         return '\n'.join(lines).format(**self.__dict__)
 
 
-
-
 def get_celeba(config):
-
     train_ds = CelebA(root='/scratch/ylxu/datasets', split='train',
-                     transform=transforms.Compose([
-                       transforms.CenterCrop(140),
-                       transforms.Resize(config.data.image_size),
-                       transforms.RandomHorizontalFlip(),
-                       transforms.ToTensor(),
-                     ]), download=False)
+                      transform=transforms.Compose([
+                          transforms.CenterCrop(140),
+                          transforms.Resize(config.data.image_size),
+                          transforms.RandomHorizontalFlip(),
+                          transforms.ToTensor(),
+                      ]), download=False)
 
     eval_ds = CelebA(root='/scratch/ylxu/datasets', split='test',
-                      transform=transforms.Compose([
-                        transforms.CenterCrop(140),
-                        transforms.Resize(config.data.image_size),
-                        transforms.ToTensor(),
-                      ]), download=False)
+                     transform=transforms.Compose([
+                         transforms.CenterCrop(140),
+                         transforms.Resize(config.data.image_size),
+                         transforms.ToTensor(),
+                     ]), download=False)
     train_ds = DataLoader(train_ds, batch_size=config.training.batch_size, shuffle=True, num_workers=4)
     eval_ds = DataLoader(eval_ds, batch_size=config.eval.batch_size, shuffle=False,
-                             num_workers=4, drop_last=True)
+                         num_workers=4, drop_last=True)
     return train_ds, eval_ds
