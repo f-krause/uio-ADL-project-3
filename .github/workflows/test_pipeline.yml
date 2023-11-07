@@ -1,0 +1,31 @@
+# Based on: https://github.uio.no/2023-s2-in5310-in9310/example-runner
+# FIXME add test.py at end
+
+name: test_pipeline
+on: workflow_dispatch
+
+jobs:
+  nvidia-smi:
+    runs-on: gpu-self-hosted
+    container:
+      image: pytorch/pytorch
+      options: --runtime=nvidia --gpus all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Execute
+        run: |
+          nvidia-smi
+
+  cifar-build:
+    needs: [nvidia-smi]
+    runs-on: gpu-self-hosted
+    container:
+      image: pytorch/pytorch
+      options: --runtime=nvidia --gpus all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Execute
+        run: |
+          python src/main.py
