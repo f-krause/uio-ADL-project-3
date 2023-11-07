@@ -138,6 +138,18 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
                 img = tf.image.convert_image_dtype(img, tf.float32)
                 return img
 
+    elif config.data.dataset == 'MNIST':
+        # https://www.tensorflow.org/datasets/catalog/mnist
+        dataset_builder = tfds.builder('mnist')
+        train_split_name = 'train'
+        eval_split_name = 'test'
+
+        def resize_op(img):
+            img = tf.image.convert_image_dtype(img, tf.float32)
+            img = tf.image.grayscale_to_rgb(img)  # TODO rn increase dimension to 3 channels
+            img = crop_resize(img, config.data.image_size)
+            return img
+
     elif config.data.dataset in ['FFHQ', 'CelebAHQ']:
         dataset_builder = tf.data.TFRecordDataset(config.data.tfrecords_path)
         train_split_name = eval_split_name = 'train'
