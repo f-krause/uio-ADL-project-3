@@ -29,7 +29,7 @@ by [Yilun Xu](http://yilun-xu.com)\*, [Ziming Liu](https://kindxiaoming.github.i
 
 We propose a new **Poisson flow** generative model (**PFGM**) that maps a uniform distribution on a high-dimensional hemisphere into any data distribution. We interpret the data points as electrical charges on the $z=0$ hyperplane in a space augmented with an additional dimension $z$, generating a high-dimensional electric field (the gradient of the solution to Poisson equation). We prove that if these charges flow upward along electric field lines, their initial distribution in the $z=0$ plane transforms into a distribution on the hemisphere of radius $r$ that becomes *uniform* in the $r \to\infty$ limit. To learn the bijective transformation, we estimate the normalized field {in the augmented space}. For sampling, we devise a backward ODE that is anchored by the physically meaningful additional dimension: the samples hit the (unaugmented) data manifold when the $z$ reaches zero. 
 
-![schematic](assets/combine.png)
+![schematic](../assets/combine.png)
 
 Experimentally, PFGM achieves **current state-of-the-art** performance among the normalizing flow models on CIFAR-10, with an Inception score of **9.68** and a FID score of **2.35**. It also performs on par with the state-of-the-art SDE approaches **(e.g., score-based SDEs or Diffusion models)** while offering **10x** to **20x** acceleration on image generation tasks. Additionally, PFGM appears more tolerant of estimation errors on a weaker network architecture and robust to the step size in the Euler method, and capable of scale-up to higher resolution datasets.
 
@@ -184,7 +184,7 @@ Please find the statistics for FID scores in the following links:
 
 
 
-<center><img src="assets/pfgm_cat.gif" width="750" height="250"/></center>
+<center><img src="../assets/pfgm_cat.gif" width="750" height="250"/></center>
 
 
 
