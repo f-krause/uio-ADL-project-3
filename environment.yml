@@ -21,7 +21,6 @@ dependencies:
   - tensorflow-probability=0.17
   - tqdm=4.64
   - pip:
-    - cuda==11.2
     - torch==1.12.1+cu116
     - torchvision==0.13.1+cu116
     - tensorflow_datasets==4.5
