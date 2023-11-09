@@ -19,10 +19,10 @@ dependencies:
   - scipy=1.11
   - tensorflow=2.9
   - tensorflow-probability=0.17
-  - torchvision=0.13.1+cu116
   - tqdm=4.64
   - pip:
     - torch==1.12.1+cu116
+    - torchvision=0.13.1+cu116
     - tensorflow_datasets==4.5
     - tensorflow_gan==2.0
     - tensorflow_hub==0.12
