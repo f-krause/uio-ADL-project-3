@@ -293,7 +293,7 @@ class Poisson():
         samples_norm = torch.from_numpy(samples_norm).cuda().view(len(samples_norm), -1)
 
         # Uniformly sample the angle direction
-        gaussian = torch.randn(shape[0], N - 1).cuda()
+        gaussian = torch.rand(shape[0], N - 1).cuda()
         unit_gaussian = gaussian / torch.norm(gaussian, p=2, dim=1, keepdim=True)
 
         # Radius times the angle direction
