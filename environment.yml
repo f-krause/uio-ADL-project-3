@@ -2,6 +2,10 @@ name: python-3.9
 channels:
   - conda-forge
   - nodefaults
+  - pytorch
+  - nvidia
+  - anaconda
+  - defaults
 dependencies:
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=2_gnu
