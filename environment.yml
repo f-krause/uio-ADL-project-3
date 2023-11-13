@@ -60,21 +60,21 @@ dependencies:
   - importlib-metadata==6.8.0
   - importlib-resources==6.1.1
   - jax==0.4.1
+  - keras==2.9.0
+  - keras-preprocessing==1.1.2
+  - libclang==16.0.6
+  - markdown==3.5.1
+  - markupsafe==2.1.3
+  - ml-collections==0.1.0
+  - ninja==1.11.1.1
+  - oauthlib==3.2.2
+  - opt-einsum==3.3.0
+  - packaging==23.2
+  - pillow==9.2.0
   - pip:
     - grpcio==1.59.2 #Possible error source
     - jaxlib==0.4.1 #Possible error source
     - etils==1.5.2 #Possible error source
-    - keras==2.9.0
-    - keras-preprocessing==1.1.2
-    - libclang==16.0.6
-    - markdown==3.5.1
-    - markupsafe==2.1.3
-    - ml-collections==0.1.0
-    - ninja==1.11.1.1
-    - oauthlib==3.2.2
-    - opt-einsum==3.3.0
-    - packaging==23.2
-    - pillow==9.2.0
     - promise==2.3
     - protobuf==3.19.6
     - pyasn1==0.5.0
