@@ -175,4 +175,3 @@ dependencies:
   - zipp=3.11.0=py39h06a4308_0
   - zlib=1.2.13=hd590300_5
   - zstd=1.5.2=ha4553b6_0
-prefix: /opt/uio/modules/rhel8/easybuild/software/Miniconda3/lmsunde/envs/python-3.9
