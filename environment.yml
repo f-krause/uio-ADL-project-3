@@ -54,16 +54,16 @@ dependencies:
   - dm-tree==0.1.8
   - flatbuffers==1.12
   - fsspec==2023.10.0
+  - gast==0.4.0
+  - grpcio==1.59.2
+  - h5py==3.10.0
+  - idna==3.4
+  - importlib-metadata==6.8.0
+  - importlib-resources==6.1.1
+  - jax==0.4.1
+  - jaxlib==0.4.1
   - pip:
     - etils==1.5.2 #Possible error source
-    - gast==0.4.0
-    - grpcio==1.59.2
-    - h5py==3.10.0
-    - idna==3.4
-    - importlib-metadata==6.8.0
-    - importlib-resources==6.1.1
-    - jax==0.4.1
-    - jaxlib==0.4.1
     - keras==2.9.0
     - keras-preprocessing==1.1.2
     - libclang==16.0.6
