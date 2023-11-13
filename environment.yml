@@ -105,3 +105,4 @@ dependencies:
     - torch==1.12.1
     - torchaudio==0.12.1
     - torchvision==0.13.1
+#Next step could be to comment out the last part of the versions. I.e.: torch==1.12 instead of torch==1.12.1
