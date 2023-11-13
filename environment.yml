@@ -86,23 +86,23 @@ dependencies:
   - wrapt==1.16.0
   - zipp==3.17.0
   - pip:
-    - ml-collections==0.1.0 #Possible error source
-    - ninja==1.11.1.1 #Possible error source
-    - grpcio==1.59.2 #Possible error source
-    - jaxlib==0.4.1 #Possible error source
-    - etils==1.5.2 #Possible error source
-    - tensorboard==2.9.1
-    - tensorboard-data-server==0.6.1
-    - tensorboard-plugin-wit==1.8.1
-    - tensorflow==2.9.0
-    - tensorflow-datasets==4.5.2
-    - tensorflow-estimator==2.9.0
-    - tensorflow-gan==2.0.0
-    - tensorflow-hub==0.12.0
-    - tensorflow-io-gcs-filesystem==0.34.0
-    - tensorflow-metadata==1.13.0
-    - tensorflow-probability==0.17.0
-    - torch==1.12.1
-    - torchaudio==0.12.1
-    - torchvision==0.13.1
+    - ml-collections==0.1 #.0 #Possible error source
+    - ninja==1.11.1 #.1 #Possible error source
+    - grpcio==1.59 #.2 #Possible error source
+    - jaxlib==0.4 #.1 #Possible error source
+    - etils==1.5 #.2 #Possible error source
+    - tensorboard==2.9 #.1
+    - tensorboard-data-server==0.6 #.1
+    - tensorboard-plugin-wit==1.8 #.1
+    - tensorflow==2.9 #.0
+    - tensorflow-datasets==4.5 #.2
+    - tensorflow-estimator==2.9 #.0
+    - tensorflow-gan==2.0 #.0
+    - tensorflow-hub==0.12 #.0
+    - tensorflow-io-gcs-filesystem==0.34 #.0
+    - tensorflow-metadata==1.13 #.0
+    - tensorflow-probability==0.17 #.0
+    - torch==1.12 #.1
+    - torchaudio==0.12 #.1
+    - torchvision==0.13 #.1
 #Next step could be to comment out the last part of the versions. I.e.: torch==1.12 instead of torch==1.12.1
