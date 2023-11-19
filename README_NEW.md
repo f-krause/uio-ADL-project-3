@@ -34,3 +34,22 @@ docker run pfgm_image python cuda_test.py
 ```bash
 docker run pfgm_image <<insert bash command here>>
 ```
+
+
+## Set up data [untested!]
+FIXME Maybe need to convert data to .zip!
+
+```bash
+mkdir data
+```
+
+### Get MNIST data
+```bash
+wget -P data/ https://github.com/golbin/TensorFlow-MNIST/blob/master/mnist/data/train-images-idx3-ubyte.gz
+bash data/get_mnist.sh
+```
+
+### Get CIFAR10 data
+```bash
+wget -P data/ https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+```
