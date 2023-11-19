@@ -75,7 +75,7 @@ def training_loop(
         # print("check num_accumulation_rounds", num_accumulation_rounds)
         assert batch_size == batch_gpu * num_accumulation_rounds * dist.get_world_size()
 
-    # Load dataset.
+    # Load dataset. TODO FOLLOW HERE TO FIND WHERE DATA IS PROCESSED TO ADD DCT
     dist.print0('Loading dataset...')
     dataset_obj = dnnlib.util.construct_class_by_name(**dataset_kwargs) # subclass of training.dataset.Dataset
     dataset_sampler = misc.InfiniteSampler(dataset=dataset_obj, rank=dist.get_rank(), num_replicas=dist.get_world_size(), seed=seed)
@@ -100,13 +100,13 @@ def training_loop(
     loss_kwargs.N = net.img_channels * net.img_resolution * net.img_resolution
     loss_fn = dnnlib.util.construct_class_by_name(**loss_kwargs) # training.loss.(VP|VE|EDM)Loss
 
-
     optimizer = dnnlib.util.construct_class_by_name(params=net.parameters(), **optimizer_kwargs) # subclass of torch.optim.Optimizer
     augment_pipe = dnnlib.util.construct_class_by_name(**augment_kwargs) if augment_kwargs is not None else None # training.augment.AugmentPipe
     ddp = torch.nn.parallel.DistributedDataParallel(net, device_ids=[device], broadcast_buffers=False)
     ema = copy.deepcopy(net).eval().requires_grad_(False)
     cur_nimg = resume_kimg * 1000
     cur_tick = 0
+
     # Resume training from previous snapshot.
     if resume_pkl is not None:
         dist.print0(f'Loading network weights from "{resume_pkl}"...')
@@ -144,8 +144,8 @@ def training_loop(
     maintenance_time = tick_start_time - start_time
     dist.update_progress(cur_nimg // 1000, total_kimg)
     stats_jsonl = None
-    while True:
 
+    while True:
         # Accumulate gradients.
         optimizer.zero_grad(set_to_none=True)
         for round_idx in range(num_accumulation_rounds):

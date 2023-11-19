@@ -69,6 +69,14 @@ class VELoss:
             # Sampling from p_r(R) by change-of-variable
             samples_norm = r * torch.sqrt(inverse_beta + 1e-8)
             samples_norm = samples_norm.view(len(samples_norm), -1)
+
+            # TODO Introduce rotation here to sample from l1 ball
+            # https://math.stackexchange.com/questions/383321/rotating-x-y-points-45-degrees
+            # gaussian = torch.rand(images.shape[0], self.N).to(samples_norm.device)
+            # theta = np.pi / 4
+            # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+            # guassian = np.matmul(gaussian, rotation_matrix)
+
             # Uniformly sample the angle direction
             gaussian = torch.randn(images.shape[0], self.N).to(samples_norm.device)
             unit_gaussian = gaussian / torch.norm(gaussian, p=2, dim=1, keepdim=True)
@@ -77,6 +85,7 @@ class VELoss:
             perturbation_x = perturbation_x.float()
 
             sigma = sigma.reshape((len(sigma), 1, 1, 1))
+
             weight = 1 / sigma ** 2
             y, augment_labels = augment_pipe(images) if augment_pipe is not None else (images, None)
             n = perturbation_x.view_as(y)
