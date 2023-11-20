@@ -70,18 +70,29 @@ class VELoss:
             samples_norm = r * torch.sqrt(inverse_beta + 1e-8)
             samples_norm = samples_norm.view(len(samples_norm), -1)
 
-            # TODO Introduce rotation here to sample from l1 ball
-            # https://math.stackexchange.com/questions/383321/rotating-x-y-points-45-degrees
-            # gaussian = torch.rand(images.shape[0], self.N).to(samples_norm.device)
-            # theta = np.pi / 4
-            # rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-            # guassian = np.matmul(gaussian, rotation_matrix)
+            # TODO uniformly sampling from l1 ball
+            # https://mathoverflow.net/questions/9185/how-to-generate-random-points-in-ell-p-balls
+            l1_prior = False
+            if l1_prior:
+                # Sample n values from the distribution exp(-|x|^p) with p = 1
+                Xn = torch.empty(images.shape[0], self.N).exponential_(1).to(samples_norm.device)
+                Xn *= torch.randint(0, 2, size=(images.shape[0], self.N)) * 2 - 1  # Randomly assign signs
 
-            # Uniformly sample the angle direction
-            gaussian = torch.randn(images.shape[0], self.N).to(samples_norm.device)
-            unit_gaussian = gaussian / torch.norm(gaussian, p=2, dim=1, keepdim=True)
+                # Sample a value from the exponential distribution with parameter 1
+                Y = torch.empty(images.shape[0], self.N).exponential_(1).to(samples_norm.device)
+
+                # Calculate the ratio (X1, ..., Xn) / (Y + sum(|Xi|^p))^(1/p)  with p = 1
+                denominator = Y + torch.sum(torch.abs(Xn), dim=1, keepdim=True)
+                samples = Xn / denominator
+                angles = samples / torch.norm(samples, p=2, dim=1, keepdim=True)
+
+            else:
+                # Uniformly sample the angle direction
+                gaussian = torch.randn(images.shape[0], self.N).to(samples_norm.device)
+                angles = gaussian / torch.norm(gaussian, p=2, dim=1, keepdim=True)
+
             # Construct the perturbation for x
-            perturbation_x = unit_gaussian * samples_norm
+            perturbation_x = angles * samples_norm
             perturbation_x = perturbation_x.float()
 
             sigma = sigma.reshape((len(sigma), 1, 1, 1))
