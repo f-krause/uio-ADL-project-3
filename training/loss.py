@@ -71,7 +71,6 @@ class VELoss:
             samples_norm = samples_norm.view(len(samples_norm), -1)
 
             # TODO uniformly sampling from l1 ball
-            # https://mathoverflow.net/questions/9185/how-to-generate-random-points-in-ell-p-balls
             l1_prior = False
             if l1_prior:
                 # Sample n values from the distribution exp(-|x|^p) with p = 1
