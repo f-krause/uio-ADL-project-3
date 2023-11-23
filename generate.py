@@ -223,7 +223,7 @@ class StackedRandomGenerator:
                 sigma_max = kwargs['sigma_max']
 
             sample_norm = torch.sqrt(inverse_beta) * sigma_max * np.sqrt(D)
-            gaussian = torch.randn(N).to(sample_norm.device)
+            gaussian = torch.randn(N).to(sample_norm.device)  # TODO ADAPT TO l1 sampling!
             unit_gaussian = gaussian / torch.norm(gaussian, p=2)
             init_sample = unit_gaussian * sample_norm
             latent_list.append(init_sample.reshape((1, *size[1:])))
@@ -376,6 +376,7 @@ def main(ckpt, end_ckpt, outdir, subdirs, seeds, class_idx, max_batch_size, save
             sampler_fn = ablation_sampler if have_ablation_kwargs else edm_sampler
             with torch.no_grad():
                 images, traj = sampler_fn(net, latents, class_labels, randn_like=rnd.randn_like, pfgmpp=pfgmpp,  **sampler_kwargs)
+                # TODO add DCT inverse transformation
 
             if save_images:
                 # save a small batch of images
