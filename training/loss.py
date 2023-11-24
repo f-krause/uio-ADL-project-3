@@ -12,6 +12,9 @@ import torch
 from torch_utils import persistence
 import numpy as np
 from scipy.stats import betaprime
+
+from training.priors import angles_l1_prior, angles_uniform_prior
+
 #----------------------------------------------------------------------------
 # Loss function corresponding to the variance preserving (VP) formulation
 # from the paper "Score-Based Generative Modeling through Stochastic
@@ -50,6 +53,7 @@ class VELoss:
         self.sigma_max = sigma_max
         self.D = D
         self.N = N
+        self.opts = opts
         print(f"In VE loss: D:{self.D}, N:{self.N}")
 
     def __call__(self, net, images, labels, augment_pipe=None, stf=False, pfgmpp=False, ref_images=None):
@@ -70,25 +74,12 @@ class VELoss:
             samples_norm = r * torch.sqrt(inverse_beta + 1e-8)
             samples_norm = samples_norm.view(len(samples_norm), -1)
 
-            # TODO uniformly sampling from l1 ball
-            l1_prior = False
-            if l1_prior:
-                # Sample n values from the distribution exp(-|x|^p) with p = 1
-                Xn = torch.empty(images.shape[0], self.N).exponential_(1).to(samples_norm.device)
-                Xn *= torch.randint(0, 2, size=(images.shape[0], self.N)) * 2 - 1  # Randomly assign signs
-
-                # Sample a value from the exponential distribution with parameter 1
-                Y = torch.empty(images.shape[0], self.N).exponential_(1).to(samples_norm.device)
-
-                # Calculate the ratio (X1, ..., Xn) / (Y + sum(|Xi|^p))^(1/p)  with p = 1
-                denominator = Y + torch.sum(torch.abs(Xn), dim=1, keepdim=True)
-                samples = Xn / denominator
-                angles = samples / torch.norm(samples, p=2, dim=1, keepdim=True)
-
+            if self.opts.l1prior:
+                # Sample angles uniformly from l1 ball, then project on unit ball
+                angles = angles_l1_prior(B=images.shape[0], N=self.N, device=samples_norm.device)
             else:
-                # Uniformly sample the angle direction
-                gaussian = torch.randn(images.shape[0], self.N).to(samples_norm.device)
-                angles = gaussian / torch.norm(gaussian, p=2, dim=1, keepdim=True)
+                # Sample angles uniformly from l2 ball surface
+                angles = angles_uniform_prior(B=images.shape[0], N=self.N, device=samples_norm.device)
 
             # Construct the perturbation for x
             perturbation_x = angles * samples_norm
@@ -149,11 +140,16 @@ class EDMLoss:
             # Sampling from p_r(R) by change-of-variable
             samples_norm = r * torch.sqrt(inverse_beta + 1e-8)
             samples_norm = samples_norm.view(len(samples_norm), -1)
-            # Uniformly sample the angle direction
-            gaussian = torch.randn(images.shape[0], self.N).to(samples_norm.device)
-            unit_gaussian = gaussian / torch.norm(gaussian, p=2, dim=1, keepdim=True)
+
+            if self.opts.l1prior:
+                # Sample angles uniformly from l1 ball, then project on unit ball
+                angles = angles_l1_prior(B=images.shape[0], N=self.N, device=samples_norm.device)
+            else:
+                # Sample angles uniformly from l2 ball surface
+                angles = angles_uniform_prior(B=images.shape[0], N=self.N, device=samples_norm.device)
+
             # Construct the perturbation for x
-            perturbation_x = unit_gaussian * samples_norm
+            perturbation_x = angles * samples_norm
             perturbation_x = perturbation_x.float()
 
             sigma = sigma.reshape((len(sigma), 1, 1, 1))
@@ -195,7 +191,6 @@ class EDMLoss:
         return loss
 
     def stf_scores(self, sigmas, perturbed_samples, samples_full):
-
         with torch.no_grad():
             #print("perturbed shape:", perturbed_samples.shape, "full shape:", samples_full.shape)
             perturbed_samples_vec = perturbed_samples.reshape((len(perturbed_samples), -1))
@@ -282,11 +277,16 @@ class EDMLoss:
         # Sampling from p_r(R) by change-of-variable
         samples_norm = r * torch.sqrt(inverse_beta + 1e-8)
         samples_norm = samples_norm.view(len(samples_norm), -1)
-        # Uniformly sample the angle direction
-        gaussian = torch.randn(samples.shape[0], self.N).to(samples_norm.device)
-        unit_gaussian = gaussian / torch.norm(gaussian, p=2, dim=1, keepdim=True)
+
+        if self.opts.l1prior:
+            # Sample angles uniformly from l1 ball, then project on unit ball
+            angles = angles_l1_prior(B=samples.shape[0], N=self.N, device=samples_norm.device)
+        else:
+            # Sample angles uniformly from l2 ball surface
+            angles = angles_uniform_prior(B=samples.shape[0], N=self.N, device=samples_norm.device)
+
         # Construct the perturbation for x
-        perturbation_x = unit_gaussian * samples_norm
+        perturbation_x = angles * samples_norm
         perturbation_x = perturbation_x.float()
 
         return samples + perturbation_x.view_as(samples)

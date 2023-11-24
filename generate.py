@@ -22,6 +22,8 @@ from torchvision.utils import make_grid, save_image
 from torch.distributions import Beta
 import glob
 from torch_utils import misc
+
+from training.priors import angles_l1_prior, angles_uniform_prior
 #----------------------------------------------------------------------------
 # Proposed EDM sampler (Algorithm 2).
 
@@ -195,11 +197,12 @@ def ablation_sampler(
 # for each sample in a minibatch.
 
 class StackedRandomGenerator:
-    def __init__(self, device, seeds):
+    def __init__(self, device, seeds, l1prior):
         super().__init__()
         self.generators = [torch.Generator(device).manual_seed(int(seed) % (1 << 32)) for seed in seeds]
         self.seeds = seeds
         self.device = device
+        self.l1prior = l1prior
 
     def randn(self, size, **kwargs):
         assert size[0] == len(self.generators)
@@ -223,9 +226,15 @@ class StackedRandomGenerator:
                 sigma_max = kwargs['sigma_max']
 
             sample_norm = torch.sqrt(inverse_beta) * sigma_max * np.sqrt(D)
-            gaussian = torch.randn(N).to(sample_norm.device)  # TODO ADAPT TO l1 sampling!
-            unit_gaussian = gaussian / torch.norm(gaussian, p=2)
-            init_sample = unit_gaussian * sample_norm
+
+            if self.l1prior:
+                # Sample angles uniformly from l1 ball, then project on unit ball
+                angles = angles_l1_prior(B=1, N=N, device=sample_norm.device)
+            else:
+                # Sample angles uniformly from l2 ball surface
+                angles = angles_uniform_prior(B=1, N=N, device=sample_norm.device)
+
+            init_sample = angles * sample_norm
             latent_list.append(init_sample.reshape((1, *size[1:])))
 
         latent = torch.cat(latent_list, dim=0)
@@ -261,7 +270,7 @@ def parse_int_list(s):
 @click.option('--outdir',                  help='Where to save the output images', metavar='DIR',                   type=str, required=True)
 @click.option('--seeds',                   help='Random seeds (e.g. 1,2,5-10)', metavar='LIST',                     type=parse_int_list, default='0-63', show_default=True)
 @click.option('--subdirs',                 help='Create subdirectory for every 1000 seeds',                         is_flag=True)
-@click.option('--save_images',             help='only save a batch images for grid visualization',                     is_flag=True)
+@click.option('--save_images',             help='only save a batch images for grid visualization',                  is_flag=True)
 @click.option('--class', 'class_idx',      help='Class label  [default: random]', metavar='INT',                    type=click.IntRange(min=0), default=None)
 @click.option('--batch', 'max_batch_size', help='Maximum batch size', metavar='INT',                                type=click.IntRange(min=1), default=64, show_default=True)
 
@@ -273,21 +282,22 @@ def parse_int_list(s):
 @click.option('--S_min', 'S_min',          help='Stoch. min noise level', metavar='FLOAT',                          type=click.FloatRange(min=0), default=0, show_default=True)
 @click.option('--S_max', 'S_max',          help='Stoch. max noise level', metavar='FLOAT',                          type=click.FloatRange(min=0), default=0, show_default=True)
 @click.option('--S_noise', 'S_noise',      help='Stoch. noise inflation', metavar='FLOAT',                          type=float, default=0, show_default=True)
-@click.option('--ckpt', 'ckpt',      help='begin ckpt', metavar='INT',                          type=int, default=0, show_default=True)
-@click.option('--resume', 'resume',      help='resume ckpt', metavar='INT',                          type=int, default=None, show_default=True)
-@click.option('--end_ckpt', 'end_ckpt',      help='end ckpt', metavar='INT',                          type=int, default=100000000, show_default=True)
+@click.option('--ckpt', 'ckpt',            help='begin ckpt', metavar='INT',                                        type=int, default=0, show_default=True)
+@click.option('--resume', 'resume',        help='resume ckpt', metavar='INT',                                       type=int, default=None, show_default=True)
+@click.option('--end_ckpt', 'end_ckpt',    help='end ckpt', metavar='INT',                                          type=int, default=100000000, show_default=True)
 
 @click.option('--solver',                  help='Ablate ODE solver', metavar='euler|heun',                          type=click.Choice(['euler', 'heun']))
 @click.option('--disc', 'discretization',  help='Ablate time step discretization {t_i}', metavar='vp|ve|iddpm|edm', type=click.Choice(['vp', 've', 'iddpm', 'edm']))
 @click.option('--schedule',                help='Ablate noise schedule sigma(t)', metavar='vp|ve|linear',           type=click.Choice(['vp', 've', 'linear']))
 @click.option('--scaling',                 help='Ablate signal scaling s(t)', metavar='vp|none',                    type=click.Choice(['vp', 'none']))
-@click.option('--edm',          help='load edm model', metavar='BOOL',              type=bool, default=False, show_default=True)
-@click.option('--use_pickle',          help='load model by pickle', metavar='BOOL',              type=bool, default=False, show_default=True)
+@click.option('--edm',                     help='load edm model', metavar='BOOL',                                   type=bool, default=False, show_default=True)
+@click.option('--use_pickle',              help='load model by pickle', metavar='BOOL',                             type=bool, default=False, show_default=True)
 
-@click.option('--pfgmpp',          help='Train PFGM++', metavar='BOOL',              type=bool, default=False, show_default=True)
-@click.option('--aug_dim',             help='additional dimension', metavar='INT',                            type=click.IntRange(min=2), default=128, show_default=True)
+@click.option('--pfgmpp',                  help='Train PFGM++', metavar='BOOL',                                     type=bool, default=False, show_default=True)
+@click.option('--aug_dim',                 help='additional dimension', metavar='INT',                              type=click.IntRange(min=2), default=128, show_default=True)
+@click.option('--l1prior',                 help='Use l1 prior', metavar='BOOL',                                     type=bool, default=False, show_default=True)
 
-def main(ckpt, end_ckpt, outdir, subdirs, seeds, class_idx, max_batch_size, save_images, pfgmpp, aug_dim, edm, use_pickle, device=torch.device('cuda'), **sampler_kwargs):
+def main(ckpt, end_ckpt, outdir, subdirs, seeds, class_idx, max_batch_size, save_images, pfgmpp, aug_dim, edm, use_pickle, l1prior, device=torch.device('cuda'), **sampler_kwargs):
     """Generate random images using the techniques described in the paper
     "Elucidating the Design Space of Diffusion-Based Generative Models".
 
@@ -351,7 +361,7 @@ def main(ckpt, end_ckpt, outdir, subdirs, seeds, class_idx, max_batch_size, save
 
             N = net.img_channels * net.img_resolution * net.img_resolution
             # Pick latents and labels.
-            rnd = StackedRandomGenerator(device, batch_seeds)
+            rnd = StackedRandomGenerator(device, batch_seeds, l1prior)
             if pfgmpp:
                 latents = rnd.rand_beta_prime([batch_size, net.img_channels, net.img_resolution, net.img_resolution],
                                     N=N,
