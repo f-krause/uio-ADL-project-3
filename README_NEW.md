@@ -1,18 +1,35 @@
 # Personal Readme
 
-## MNIST data
-Download link for MNIST training data: 
+## CIFAR-10 data
+In downloads:
+```bash
+wget https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+```
 
+In root to make it zip and get data for FID score computation:
+```bash
+python dataset_tool.py --source=downloads/cifar-10-python.tar.gz --dest=datasets/cifar-10-python.zip
+python fid.py ref --data=datasets/cifar-10-python.zip --dest=fid-refs/cifar-10-python.npz
+```
+
+
+## MNIST data
 In downloads:
 ```bash
 wget http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+wget http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz 
 ```
 
 In root to make it zip and get data for FID score computation:
 ```bash
 python dataset_tool.py --source=downloads/train-images-idx3-ubyte.gz --dest=datasets/mnist_train.zip
-python fid.py ref --data=datasets/mnist_train.zip --dest=fid-refs/mnist_train.zip.npz
+python fid.py ref --data=datasets/mnist_train.zip --dest=fid-refs/mnist_train.npz
 ```
+
+
+
+
+
 
 
 
@@ -49,23 +66,4 @@ docker run pfgm_image python cuda_test.py
 ### Run arbitrary tasks via docker
 ```bash
 docker run pfgm_image <<insert bash command here>>
-```
-
-
-## Set up data [untested!]
-FIXME Maybe need to convert data to .zip!
-
-```bash
-mkdir data
-```
-
-### Get MNIST data
-```bash
-wget -P data/ https://github.com/golbin/TensorFlow-MNIST/blob/master/mnist/data/train-images-idx3-ubyte.gz
-bash data/get_mnist.sh
-```
-
-### Get CIFAR10 data
-```bash
-wget -P data/ https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
 ```
