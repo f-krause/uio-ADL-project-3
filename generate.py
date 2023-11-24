@@ -227,6 +227,7 @@ class StackedRandomGenerator:
 
             sample_norm = torch.sqrt(inverse_beta) * sigma_max * np.sqrt(D)
 
+            # FIXME L1 PRIOR ADDED
             if self.l1prior:
                 # Sample angles uniformly from l1 ball, then project on unit ball
                 angles = angles_l1_prior(B=1, N=N, device=sample_norm.device)

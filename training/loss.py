@@ -74,6 +74,7 @@ class VELoss:
             samples_norm = r * torch.sqrt(inverse_beta + 1e-8)
             samples_norm = samples_norm.view(len(samples_norm), -1)
 
+            # FIXME L1 PRIOR ADDED
             if self.opts.l1prior:
                 # Sample angles uniformly from l1 ball, then project on unit ball
                 angles = angles_l1_prior(B=images.shape[0], N=self.N, device=samples_norm.device)
@@ -141,6 +142,7 @@ class EDMLoss:
             samples_norm = r * torch.sqrt(inverse_beta + 1e-8)
             samples_norm = samples_norm.view(len(samples_norm), -1)
 
+            # FIXME L1 PRIOR ADDED
             if self.opts.l1prior:
                 # Sample angles uniformly from l1 ball, then project on unit ball
                 angles = angles_l1_prior(B=images.shape[0], N=self.N, device=samples_norm.device)
@@ -187,7 +189,7 @@ class EDMLoss:
         else:
             target = y
 
-        loss = weight * ((D_yn - target) ** 2)
+        loss = weight * ((D_yn - target) ** 2)  # Here we should probably add the KL-divergence with the prior.
         return loss
 
     def stf_scores(self, sigmas, perturbed_samples, samples_full):
@@ -278,6 +280,7 @@ class EDMLoss:
         samples_norm = r * torch.sqrt(inverse_beta + 1e-8)
         samples_norm = samples_norm.view(len(samples_norm), -1)
 
+        # FIXME L1 PRIOR ADDED
         if self.opts.l1prior:
             # Sample angles uniformly from l1 ball, then project on unit ball
             angles = angles_l1_prior(B=samples.shape[0], N=self.N, device=samples_norm.device)
