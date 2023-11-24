@@ -15,6 +15,8 @@ import json
 import torch
 import dnnlib
 
+from torch_utils.dct import dct2
+
 try:
     import pyspng
 except ImportError:
@@ -169,11 +171,13 @@ class ImageFolderDataset(Dataset):
         path,                   # Path to directory or zip.
         resolution      = None, # Ensure specific resolution, None = highest available.
         use_pyspng      = True, # Use pyspng if available?
+        dct             = False,# Apply dct
         **super_kwargs,         # Additional arguments for the Dataset base class.
     ):
         self._path = path
         self._use_pyspng = use_pyspng
         self._zipfile = None
+        self.dct = dct
 
         if os.path.isdir(self._path):
             self._type = 'dir'
@@ -222,7 +226,6 @@ class ImageFolderDataset(Dataset):
     def __getstate__(self):
         return dict(super().__getstate__(), _zipfile=None)
 
-    # TODO ADD HERE DCT?
     def _load_raw_image(self, raw_idx):
         fname = self._image_fnames[raw_idx]
         with self._open_file(fname) as f:
@@ -233,7 +236,14 @@ class ImageFolderDataset(Dataset):
         if image.ndim == 2:
             image = image[:, :, np.newaxis] # HW => HWC
         image = image.transpose(2, 0, 1) # HWC => CHW
-        # TODO DCT ADD HERE?
+
+        if self.dct:
+            # TODO needs to be tested
+            dct_image = torch.zeros_like(image)
+            for i in range(image.shape[-1]):  # Apply dct over channels
+                dct_image[:, :, i] = dct2(image[:, :, i])
+            image = dct_image
+
         return image
 
     def _load_raw_labels(self):

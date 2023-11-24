@@ -23,7 +23,7 @@ import glob
 
 def calculate_inception_stats(
     image_path, num_expected=None, seed=0, max_batch_size=64,
-    num_workers=3, prefetch_factor=2, device=torch.device('cuda'),
+    num_workers=3, prefetch_factor=2, device=torch.device('cuda'), dct=False
 ):
     # Rank 0 goes first.
     if dist.get_rank() != 0:
@@ -40,7 +40,7 @@ def calculate_inception_stats(
 
     # List images.
     dist.print0(f'Loading images from "{image_path}"...')
-    dataset_obj = dataset.ImageFolderDataset(path=image_path, max_size=num_expected, random_seed=seed)
+    dataset_obj = dataset.ImageFolderDataset(path=image_path, max_size=num_expected, random_seed=seed, dct=dct)
     if num_expected is not None and len(dataset_obj) < num_expected:
         raise click.ClickException(f'Found {len(dataset_obj)} images, but expected at least {num_expected}')
     if len(dataset_obj) < 2:
@@ -193,13 +193,14 @@ def calc(image_path, ref_path, num_expected, seed, ckpt, end_ckpt, batch, gen_se
 @click.option('--data', 'dataset_path', help='Path to the dataset', metavar='PATH|ZIP', type=str, required=True)
 @click.option('--dest', 'dest_path',    help='Destination .npz file', metavar='NPZ',    type=str, required=True)
 @click.option('--batch',                help='Maximum batch size', metavar='INT',       type=click.IntRange(min=1), default=64, show_default=True)
+@click.option('--dct',                  help='Apply DCT transform', metavar='BOOL',     type=bool, default=False, show_default=True)
 
-def ref(dataset_path, dest_path, batch):
+def ref(dataset_path, dest_path, batch, dct):
     """Calculate dataset reference statistics needed by 'calc'."""
     torch.multiprocessing.set_start_method('spawn')
     dist.init()
 
-    mu, sigma = calculate_inception_stats(image_path=dataset_path, max_batch_size=batch)
+    mu, sigma = calculate_inception_stats(image_path=dataset_path, max_batch_size=batch, dct=dct)
     dist.print0(f'Saving dataset reference statistics to "{dest_path}"...')
     if dist.get_rank() == 0:
         if os.path.dirname(dest_path):

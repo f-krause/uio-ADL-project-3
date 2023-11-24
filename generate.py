@@ -297,8 +297,9 @@ def parse_int_list(s):
 @click.option('--pfgmpp',                  help='Train PFGM++', metavar='BOOL',                                     type=bool, default=False, show_default=True)
 @click.option('--aug_dim',                 help='additional dimension', metavar='INT',                              type=click.IntRange(min=2), default=128, show_default=True)
 @click.option('--l1prior',                 help='Use l1 prior', metavar='BOOL',                                     type=bool, default=False, show_default=True)
+@click.option('--dct',                     help='Apply DCT transform', metavar='BOOL',                              type=bool, default=False, show_default=True)
 
-def main(ckpt, end_ckpt, outdir, subdirs, seeds, class_idx, max_batch_size, save_images, pfgmpp, aug_dim, edm, use_pickle, l1prior, device=torch.device('cuda'), **sampler_kwargs):
+def main(ckpt, end_ckpt, outdir, subdirs, seeds, class_idx, max_batch_size, save_images, pfgmpp, aug_dim, edm, use_pickle, l1prior, dct, device=torch.device('cuda'), **sampler_kwargs):
     """Generate random images using the techniques described in the paper
     "Elucidating the Design Space of Diffusion-Based Generative Models".
 
@@ -387,7 +388,17 @@ def main(ckpt, end_ckpt, outdir, subdirs, seeds, class_idx, max_batch_size, save
             sampler_fn = ablation_sampler if have_ablation_kwargs else edm_sampler
             with torch.no_grad():
                 images, traj = sampler_fn(net, latents, class_labels, randn_like=rnd.randn_like, pfgmpp=pfgmpp,  **sampler_kwargs)
-                # TODO add DCT inverse transformation
+
+            if dct:
+                # TODO needs to be tested
+                # FIXME QUITE NOOBY WAY - COULD PROB BE VECTORIZED FOR SPEEDUP
+                rec_images = []
+                for dct_img in images:  # Iterate through each image -> inefficient
+                    rec_image = np.zeros_like(dct_img)
+                    for i in range(dct_img.shape[-1]):  # Iterate over channels
+                        rec_image[:, :, i] = idct2(dct_img[:, :, i])
+                    rec_images.append(rec_image)
+                images = torch.tensor(rec_images)
 
             if save_images:
                 # save a small batch of images

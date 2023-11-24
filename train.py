@@ -50,6 +50,7 @@ def parse_int_list(s):
 @click.option('--arch',          help='Network architecture', metavar='ddpmpp|ncsnpp|adm',          type=click.Choice(['ddpmpp', 'ncsnpp', 'adm']), default='ddpmpp', show_default=True)
 @click.option('--precond',       help='Preconditioning & loss function', metavar='vp|ve|edm',       type=click.Choice(['vp', 've', 'edm']), default='edm', show_default=True)
 @click.option('--l1prior',       help='Use l1 prior', metavar='BOOL',                               type=bool, default=False, show_default=True)
+@click.option('--dct',           help='Apply DCT transform', metavar='BOOL',                        type=bool, default=False, show_default=True)
 
 # Hyperparameters.
 @click.option('--duration',      help='Training duration', metavar='MIMG',                          type=click.FloatRange(min=0, min_open=True), default=200, show_default=True)
@@ -113,8 +114,9 @@ def main(**kwargs):
     try:
         dataset_obj = dnnlib.util.construct_class_by_name(**c.dataset_kwargs)
         dataset_name = dataset_obj.name
-        c.dataset_kwargs.resolution = dataset_obj.resolution # be explicit about dataset resolution
-        c.dataset_kwargs.max_size = len(dataset_obj) # be explicit about dataset size
+        c.dataset_kwargs.resolution = dataset_obj.resolution  # be explicit about dataset resolution
+        c.dataset_kwargs.max_size = len(dataset_obj)  # be explicit about dataset size
+        c.dataset_kwargs.dct = opts.dct  # add dct indicator in dataset_kwargs
         if opts.cond and not dataset_obj.has_labels:
             raise click.ClickException('--cond=True requires labels specified in dataset.json')
         del dataset_obj # conserve memory
