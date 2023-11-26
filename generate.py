@@ -392,14 +392,12 @@ def main(ckpt, end_ckpt, outdir, subdirs, seeds, class_idx, max_batch_size, save
 
             if dct:
                 # TODO needs to be tested
-                # FIXME QUITE NOOBY WAY - COULD PROB BE VECTORIZED FOR SPEEDUP
-                rec_images = []
-                for dct_img in images:  # Iterate through each image -> inefficient
-                    rec_image = torch.zeros_like(dct_img)
+                # FIXME QUITE NOOBY WAY - idct2 COULD PROB BE VECTORIZED FOR SPEEDUP
+                rec_image = torch.zeros_like(images)
+                for idx, dct_img in enumerate(images):  # Iterate through each image -> inefficient
                     for i in range(dct_img.shape[-1]):  # Iterate over channels
-                        rec_image[:, :, i] = idct2(dct_img[:, :, i])
-                    rec_images.append(rec_image)
-                images = torch.tensor(rec_images)
+                        rec_image[idx, :, :, i] = idct2(dct_img[:, :, i])
+                images = rec_image
 
             if save_images:
                 # save a small batch of images
