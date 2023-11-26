@@ -14,7 +14,8 @@ def angles_l1_prior(B: int, N: int, device: torch.device):
     """
     # Sample B x N values from the distribution exp(-|x|^p) with p = 1
     Xn = torch.empty(B, N).exponential_(1).to(device)
-    Xn *= torch.randint(0, 2, size=(B, N)) * 2 - 1  # Randomly assign signs
+    rand_signs = torch.randint(0, 2, size=(B, N)) * 2 - 1  # Randomly assign signs
+    Xn *= rand_signs.to(device)
 
     # Sample a value from the exponential distribution with parameter 1
     Y = torch.empty(B, N).exponential_(1).to(device)
