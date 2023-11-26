@@ -245,7 +245,7 @@ class ImageFolderDataset(Dataset):
                 dct_image[:, :, i] = dct2(image[:, :, i])
             image = dct_image
 
-        return image
+        return np.array(image)
 
     def _load_raw_labels(self):
         fname = 'dataset.json'
