@@ -236,6 +236,7 @@ class ImageFolderDataset(Dataset):
         if image.ndim == 2:
             image = image[:, :, np.newaxis] # HW => HWC
         image = image.transpose(2, 0, 1) # HWC => CHW
+        image = torch.tensor(image)
 
         if self.dct:
             # TODO needs to be tested
