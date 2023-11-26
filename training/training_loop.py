@@ -214,9 +214,12 @@ def training_loop(
             dist.print0('Aborting...')
 
         # Save full dump of the training state.
+        print("cur_tick % state_dump_ticks == 0", cur_tick % state_dump_ticks == 0)
         if (state_dump_ticks is not None) and (done or cur_tick % state_dump_ticks == 0) and cur_tick != 0 and dist.get_rank() == 0:
+            # FIXME Here is something fishy: only last state saved!
             torch.save(dict(optimizer_state=optimizer.state_dict(), step=cur_nimg, ema=ema, net=net),
                        os.path.join(run_dir, f'training-state-{cur_nimg//1000:06d}.pt'))
+            print("model saved to:", os.path.join(run_dir, f'training-state-{cur_nimg // 1000:06d}.pt'))
 
         # Update logs.
         training_stats.default_collector.update()
