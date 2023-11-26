@@ -21,9 +21,10 @@ from torch_utils import distributed as dist
 from torchvision.utils import make_grid, save_image
 from torch.distributions import Beta
 import glob
-from torch_utils import misc
+# from torch_utils import misc
 
 from training.priors import angles_l1_prior, angles_uniform_prior
+from torch_utils.dct import idct2
 #----------------------------------------------------------------------------
 # Proposed EDM sampler (Algorithm 2).
 
