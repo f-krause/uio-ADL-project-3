@@ -6,8 +6,8 @@ def angles_l1_prior(B: int, N: int, device: torch.device):
     # Based on: https://mathoverflow.net/questions/9185/how-to-generate-random-points-in-ell-p-balls
 
     Args:
-        B: Number of dimensions
-        N: Number of samples
+        B: Number of samples
+        N: Dimensionality of image
         device: Device to use for the samples
     Returns:
         A tensor of shape (D, N) containing the samples
