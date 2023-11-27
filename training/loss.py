@@ -9,6 +9,7 @@
 "Elucidating the Design Space of Diffusion-Based Generative Models"."""
 
 import torch
+from torchsummary import summary
 from torch_utils import persistence
 import numpy as np
 from scipy.stats import betaprime
@@ -98,6 +99,9 @@ class VELoss:
             weight = 1 / sigma ** 2
             y, augment_labels = augment_pipe(images) if augment_pipe is not None else (images, None)
             n = torch.randn_like(y) * sigma
+            print("##############################")
+            print(summary(net, (3, 32, 32), batch_size=64))
+            print("##############################")
             D_yn = net(y + n, sigma, labels, augment_labels=augment_labels)
 
         loss = weight * ((D_yn - y) ** 2)
