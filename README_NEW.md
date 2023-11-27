@@ -23,7 +23,6 @@ wget http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
 In root to make it zip and get data for FID score computation:
 ```bash
 python dataset_tool.py --source=downloads/train-images-idx3-ubyte.gz --dest=datasets/mnist_train.zip
-python fid.py ref --data=datasets/mnist_train.zip --dest=fid-refs/mnist_train.npz
 ```
 
 
