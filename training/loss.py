@@ -99,9 +99,6 @@ class VELoss:
             weight = 1 / sigma ** 2
             y, augment_labels = augment_pipe(images) if augment_pipe is not None else (images, None)
             n = torch.randn_like(y) * sigma
-            print("##############################")
-            print(summary(net, (3, 32, 32), batch_size=64))
-            print("##############################")
             D_yn = net(y + n, sigma, labels, augment_labels=augment_labels)
 
         loss = weight * ((D_yn - y) ** 2)
@@ -163,6 +160,9 @@ class EDMLoss:
             weight = (sigma ** 2 + self.sigma_data ** 2) / (sigma * self.sigma_data) ** 2
             y, augment_labels = augment_pipe(images) if augment_pipe is not None else (images, None)
             n = perturbation_x.view_as(y)
+            print("##############################")
+            print(summary(net, (3, 32, 32), batch_size=64))
+            print("##############################")
             D_yn = net(y + n, sigma, labels, augment_labels=augment_labels)
         else:
             rnd_normal = torch.randn([images.shape[0], 1, 1, 1], device=images.device)
