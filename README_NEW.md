@@ -1,6 +1,13 @@
-# Personal Readme
+# Readme for gp3
 
-## CIFAR-10 data
+## Set up environment
+Create conda environment with provided environment.yml file. We recommend using mamba to speed up the process.
+```bash
+conda env create -f environment.yml
+```
+
+
+## Get CIFAR-10 data
 In downloads:
 ```bash
 wget https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
@@ -13,7 +20,7 @@ python fid.py ref --data=datasets/cifar-10-python.zip --dest=fid-refs/cifar-10-p
 ```
 
 
-## MNIST data
+## Get MNIST data
 In downloads:
 ```bash
 wget http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
@@ -26,43 +33,21 @@ python dataset_tool.py --source=downloads/train-images-idx3-ubyte.gz --dest=data
 ```
 
 
-
-
-
-
-
-
-## Setup GPU support
-https://docs.docker.com/config/containers/resource_constraints/#gpu
-
-### Verify nvidia container setup
+## Run CIFAR training
 ```bash
-which nvidia-container-runtime-hook
+torchrun --standalone --nproc_per_node=4 train.py --outdir=training-runs --name pfgm_baseline_128 --data=datasets/cifar10-32x32.zip --cond=0 --arch=ddpmpp --pfgmpp=1 --batch 512 --aug_dim 128 --duration 20
 ```
 
+Adapt --name to the desired name of the training run.
 
-### Expose GPUs
+You can set the flags --l1prior to enable l1 prior sampling and --dct to enable DCT based training/sampling.
+
+## Generate 50.000 images
 ```bash
-docker run -it --rm --gpus all ubuntu nvidia-smi
+torchrun --standalone --nproc_per_node=4 generate.py --seeds=0-49999 --outdir=training-runs/pfgm_baseline_128 --pfgmpp=1 --aug_dim=128
 ```
 
-
-## Docker
-### Base docker image
-https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch
-
-### Build docker image in curr dir
+## Compute FID score
 ```bash
-docker build -t pfgm_image .
-```
-
-### Check for GPU access via docker image
-```bash
-docker run pfgm_image python cuda_test.py
-```
-
-
-### Run arbitrary tasks via docker
-```bash
-docker run pfgm_image <<insert bash command here>>
+torchrun --standalone --nproc_per_node=4 fid.py calc --images=training-runs/pfgm_baseline_128 --ref=fid-refs/cifar10-32x32.npz --num 50000
 ```
