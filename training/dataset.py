@@ -236,16 +236,17 @@ class ImageFolderDataset(Dataset):
         if image.ndim == 2:
             image = image[:, :, np.newaxis] # HW => HWC
         image = image.transpose(2, 0, 1) # HWC => CHW
-        image = torch.tensor(image)
+        image = torch.tensor(image)  # FIXME This is bad, as we are converting to numpy and back to torch
 
         if self.dct:
             # TODO needs to be tested
+            image = image / 255.0  # Normalize to get correct DCT results
             dct_image = torch.zeros_like(image)
-            for i in range(image.shape[-1]):  # Apply dct over channels
-                dct_image[:, :, i] = dct2(image[:, :, i])
+            for i in range(image.shape[0]):  # Apply dct over channels
+                dct_image[i, :, :] = dct2(image[i, :, :])
             image = dct_image
 
-        return np.array(image)
+        return np.array(image, dtype=np.uint8)  # FIXME this is bad as negative values are obtained with DCT
 
     def _load_raw_labels(self):
         fname = 'dataset.json'
