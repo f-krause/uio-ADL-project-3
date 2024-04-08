@@ -1,5 +1,7 @@
 # Poisson Flow Generative Model for Image Generation
 
+Based on the work of https://github.com/Newbeeer/pfgmpp.
+
 ![project5](https://github.com/f-krause/uio-ADL-project-3/assets/93521294/9c1a82b9-c8f8-4024-8428-b42f0f0e26e7)
 
 ## Set up environment
