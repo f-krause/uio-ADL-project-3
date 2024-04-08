@@ -1,10 +1,13 @@
-# Readme for gp3
+# Poisson Flow Generative Model for Image Generation
+
+![project5](https://github.com/f-krause/uio-ADL-project-3/assets/93521294/9c1a82b9-c8f8-4024-8428-b42f0f0e26e7)
 
 ## Set up environment
 Create conda environment with provided environment.yml file. We recommend using mamba to speed up the process.
 ```bash
 conda env create -f environment.yml
 ```
+
 
 
 ## Get CIFAR-10 data
